@@ -1,0 +1,355 @@
+algoritmo "jogo da velha p2"
+
+var
+
+  Tquadrantes : vetor[1..9,1..9] de caractere
+  destacarc : vetor[1..9,1..9] de logico
+  Tabugrande : vetor[1..3,1..3] de caractere
+  Dgrande : vetor[1..3,1..3] de logico
+  simboloJogador : vetor[1..2] de caractere
+  jogadas : vetor[1..9] de inteiro
+  decidido : vetor[1..9] de logico
+  marcasPorLinha : vetor[1..3] de inteiro
+  marcasPorColuna : vetor[1..3] de inteiro
+  linhaQuadrante, colunaQuadrante, linhaCasaEscolhida, colunaCasaEscolhida : inteiro
+  numQuadrante, numCasa, indiceCasa : inteiro
+  linha, coluna, posicao, linhaInterna, colunaInterna : inteiro
+  totalJogadas, contDiagPrincipal, contDiagSecundaria : inteiro
+  totalFinalizados, quadrantesX, quadrantesO : inteiro
+  atual, LinhaqAtual, ColunaQAtual : inteiro
+  indiceEscolhedor, indiceJogadorDaVez : inteiro
+  vez, vencedor, aviso, textoCelula, separadorColuna : caractere
+  jogou, ganhou, jogoEncerrado, venceuQuadrante, subjogoTerminou, encerrarPrograma : logico
+
+inicio
+
+  simboloJogador[1] <- "X"
+  simboloJogador[2] <- "O"
+  para linha de 1 ate 9 faca
+  jogadas[linha] <- 0
+  decidido[linha] <- falso
+  para coluna de 1 ate 9 faca
+  Tquadrantes[linha,coluna] <- " "
+  destacarc[linha,coluna] <- falso
+  fimpara
+  fimpara
+  para linha de 1 ate 3 faca
+  para coluna de 1 ate 3 faca
+  Tabugrande[linha,coluna] <- " "
+  Dgrande[linha,coluna] <- falso
+  fimpara
+  fimpara
+  totalJogadas <- 0
+  aviso <- ""
+  vencedor <- ""
+  atual <- 0
+  LinhaqAtual <- 0
+  ColunaQAtual <- 0
+  indiceEscolhedor <- 1
+  indiceJogadorDaVez <- 1
+  vez <- "X"
+  ganhou <- falso
+  jogoEncerrado <- falso
+  encerrarPrograma <- falso
+
+  enquanto(nao encerrarPrograma) faca
+    limpatela
+    se (nao jogoEncerrado) entao
+    vez <- simboloJogador[indiceJogadorDaVez]
+    fimse
+    quadrantesX <- 0
+    quadrantesO <- 0
+    para linha de 1 ate 3 faca
+    para coluna de 1 ate 3 faca
+    se (Tabugrande[linha,coluna] = "X") entao
+    quadrantesX <- quadrantesX + 1
+    fimse
+    se (Tabugrande[linha,coluna] = "O") entao
+    quadrantesO <- quadrantesO + 1
+    fimse
+    fimpara
+    fimpara
+    escreval("      JOGO DA VELHA")
+    se (jogoEncerrado) entao
+    escreval(" Jogador atual : -- (jogo encerrado)")
+    se (ganhou) entao
+    escreval(" Estado : FIM - vitoria do jogador ", vencedor)
+    senao
+    escreval(" Estado  : FIM - empate")
+    fimse
+    senao
+    escreval(" Jogador atual : >> ", vez, " <<")
+    se (atual = 0) entao
+    escreval(" Estado        : ", vez, " vai ESCOLHER o proximo quadrante")
+    senao
+    escreval(" Estado        : jogando no quadrante linha ", LinhaqAtual, ", coluna ", ColunaQAtual)
+    fimse
+    fimse
+    escreval(" Quadrantes    : X = ", quadrantesX, "   O = ", quadrantesO)
+    escreval(" Jogadas       : ", totalJogadas, " (maximo 81)")
+    escreval("=================================================")
+    escreval("")
+    escreval("          1           2           3")
+    escreval("    #####################################")
+    para linha de 1 ate 3 faca
+    para linhaInterna de 1 ate 3 faca
+    se (linhaInterna = 2) entao
+    escreva(" ", linha, "  ")
+    senao
+    escreva("    ")
+    fimse
+    escreva("#")
+    para coluna de 1 ate 3 faca
+    numQuadrante <- (linha - 1) * 3 + coluna
+    se (numQuadrante = atual) entao
+    separadorColuna <- ":"
+    senao
+    separadorColuna <- "|"
+    fimse
+    para colunaInterna de 1 ate 3 faca
+    indiceCasa <- (linhaInterna - 1) * 3 + colunaInterna
+    se (destacarc[numQuadrante,indiceCasa]) entao
+    textoCelula <- "[" + Tquadrantes[numQuadrante,indiceCasa] + "]"
+    senao
+    textoCelula <- " " + Tquadrantes[numQuadrante,indiceCasa] + " "
+    fimse
+    escreva(textoCelula)
+    se (colunaInterna < 3) entao
+    escreva(separadorColuna)
+    fimse
+    fimpara
+    escreva("#")
+    fimpara
+    escreval("")
+    se (linhaInterna < 3) entao
+    escreval("    #---+---+---#---+---+---#---+---+---#")
+    fimse
+    fimpara
+    escreval("    #####################################")
+    fimpara
+    escreval("")
+    escreval(" Linhas e colunas vao de 1 a 3, no quadrante e na casa.")
+    escreval(" [X] ou [O] = combinacao vencedora")
+    escreval(" Separador : = quadrante em jogo no momento")
+    escreval("")
+    escreval(" TABULEIRO GRANDE (quem domina cada quadrante)")
+    escreval("        1   2   3")
+    para linha de 1 ate 3 faca
+    escreva("   ", linha, "   ")
+    para coluna de 1 ate 3 faca
+    indiceCasa <- (linha - 1) * 3 + coluna
+    se (Dgrande[linha,coluna]) entao
+    textoCelula <- "[" + Tabugrande[linha,coluna] + "]"
+    senao
+    se (Tabugrande[linha,coluna] = " ") e (decidido[indiceCasa]) entao
+    textoCelula <- " - "
+    senao
+    textoCelula <- " " + Tabugrande[linha,coluna] + " "
+    fimse
+    fimse
+    escreva(textoCelula)
+    se (coluna < 3) entao
+    escreva("|")
+    fimse
+    fimpara
+    escreval("")
+    se (linha < 3) entao
+    escreval("       ---+---+---")
+    fimse
+    fimpara
+    escreval("   (- = deu velha no quadrante, casa grande vazia)")
+    escreval("")
+    escreval("-------------------------------------------------")
+    escreval(aviso)
+    aviso <- ""
+    se (jogoEncerrado) entao
+    se (ganhou) entao
+    escreval("O jogador ", vencedor, " venceu o jogo!")
+    senao
+    escreval("Deu velha geral! Ninguem venceu.")
+    fimse
+    escreval("")
+    escreval("Fim de jogo.")
+    encerrarPrograma <- verdadeiro
+    senao
+    jogou <- falso
+    se (atual = 0) entao
+    escreval("Jogador ", vez, ", ESCOLHA o quadrante do proximo jogo:")
+    escreva("  Quadrante - linha  (1 a 3): ")
+    leia(linhaQuadrante)
+    escreva("  Quadrante - coluna (1 a 3): ")
+    leia(colunaQuadrante)
+    se (linhaQuadrante >= 1) e (linhaQuadrante <= 3) e (colunaQuadrante >= 1) e (colunaQuadrante <= 3) entao
+    numQuadrante <- (linhaQuadrante - 1) * 3 + colunaQuadrante
+    se (decidido[numQuadrante]) entao
+    aviso <- "Esse quadrante ja foi decidido! Escolha outro."
+    senao
+    atual <- numQuadrante
+    LinhaqAtual <- linhaQuadrante
+    ColunaQAtual <- colunaQuadrante
+    aviso <- "Quadrante escolhido! O jogador " + vez + " comeca a jogar nele."
+    fimse
+    senao
+    aviso <- "Posicao invalida! Use valores de 1 a 3."
+    fimse
+    senao
+    numQuadrante <- atual
+    escreval("Jogador ", vez, ", escolha a CASA dentro do quadrante:")
+    escreva("  Casa - linha  (1 a 3): ")
+    leia(linhaCasaEscolhida)
+    escreva("  Casa - coluna (1 a 3): ")
+    leia(colunaCasaEscolhida)
+    se (linhaCasaEscolhida >= 1) e (linhaCasaEscolhida <= 3) e (colunaCasaEscolhida >= 1) e (colunaCasaEscolhida <= 3) entao
+    numCasa <- (linhaCasaEscolhida - 1) * 3 + colunaCasaEscolhida
+    se (Tquadrantes[numQuadrante,numCasa] = " ") entao
+    Tquadrantes[numQuadrante,numCasa] <- vez
+    jogou <- verdadeiro
+    senao
+    aviso <- "Posicao ja ocupada!"
+    fimse
+    senao
+    aviso <- "Posicao invalida! Use valores de 1 a 3."
+    fimse
+    se (jogou) entao
+    totalJogadas <- totalJogadas + 1
+    jogadas[numQuadrante] <- jogadas[numQuadrante] + 1
+    para linha de 1 ate 3 faca
+    marcasPorLinha[linha] <- 0
+    marcasPorColuna[linha] <- 0
+    fimpara
+    contDiagPrincipal <- 0
+    contDiagSecundaria <- 0
+    para linha de 1 ate 3 faca
+    para coluna de 1 ate 3 faca
+    indiceCasa <- (linha - 1) * 3 + coluna
+    se (Tquadrantes[numQuadrante,indiceCasa] = vez) entao
+    marcasPorLinha[linha] <- marcasPorLinha[linha] + 1
+    marcasPorColuna[coluna] <- marcasPorColuna[coluna] + 1
+    se (linha = coluna) entao
+    contDiagPrincipal <- contDiagPrincipal + 1
+    fimse
+    se (linha + coluna = 4) entao
+    contDiagSecundaria <- contDiagSecundaria + 1
+    fimse
+    fimse
+    fimpara
+    fimpara
+    venceuQuadrante <- falso
+    para linha de 1 ate 3 faca
+    se (marcasPorLinha[linha] = 3) entao
+    venceuQuadrante <- verdadeiro
+    para posicao de 1 ate 3 faca
+    indiceCasa <- (linha - 1) * 3 + posicao
+    destacarc[numQuadrante,indiceCasa] <- verdadeiro
+    fimpara
+    fimse
+    se (marcasPorColuna[linha] = 3) entao
+    venceuQuadrante <- verdadeiro
+    para posicao de 1 ate 3 faca
+    indiceCasa <- (posicao - 1) * 3 + linha
+    destacarc[numQuadrante,indiceCasa] <- verdadeiro
+    fimpara
+    fimse
+    fimpara
+    se (contDiagPrincipal = 3) entao
+    venceuQuadrante <- verdadeiro
+    para posicao de 1 ate 3 faca
+    indiceCasa <- (posicao - 1) * 3 + posicao
+    destacarc[numQuadrante,indiceCasa] <- verdadeiro
+    fimpara
+    fimse
+    se (contDiagSecundaria = 3) entao
+    venceuQuadrante <- verdadeiro
+    para posicao de 1 ate 3 faca
+    indiceCasa <- (posicao - 1) * 3 + (4 - posicao)
+    destacarc[numQuadrante,indiceCasa] <- verdadeiro
+    fimpara
+    fimse
+    subjogoTerminou <- falso
+    se (venceuQuadrante) entao
+    Tabugrande[LinhaqAtual,ColunaQAtual] <- vez
+    decidido[numQuadrante] <- verdadeiro
+    subjogoTerminou <- verdadeiro
+    aviso <- "O jogador " + vez + " venceu o quadrante!"
+    senao
+    se (jogadas[numQuadrante] = 9) entao
+    decidido[numQuadrante] <- verdadeiro
+    subjogoTerminou <- verdadeiro
+    aviso <- "O quadrante deu velha! A casa grande fica vazia."
+    fimse
+    fimse
+    se (venceuQuadrante) entao
+    para linha de 1 ate 3 faca
+    marcasPorLinha[linha] <- 0
+    marcasPorColuna[linha] <- 0
+    fimpara
+    contDiagPrincipal <- 0
+    contDiagSecundaria <- 0
+    para linha de 1 ate 3 faca
+    para coluna de 1 ate 3 faca
+    se (Tabugrande[linha,coluna] = vez) entao
+    marcasPorLinha[linha] <- marcasPorLinha[linha] + 1
+    marcasPorColuna[coluna] <- marcasPorColuna[coluna] + 1
+
+    se (linha = coluna) entao
+    contDiagPrincipal <- contDiagPrincipal + 1
+    fimse
+    se (linha + coluna = 4) entao
+    contDiagSecundaria <- contDiagSecundaria + 1
+    fimse
+    fimse
+    fimpara
+    fimpara
+    para linha de 1 ate 3 faca
+    se (marcasPorLinha[linha] = 3) entao
+    ganhou <- verdadeiro
+    para posicao de 1 ate 3 faca
+    Dgrande[linha,posicao] <- verdadeiro
+    fimpara
+    fimse
+    se (marcasPorColuna[linha] = 3) entao
+    ganhou <- verdadeiro
+    para posicao de 1 ate 3 faca
+    Dgrande[posicao,linha] <- verdadeiro
+    fimpara
+    fimse
+    fimpara
+    se (contDiagPrincipal = 3) entao
+    ganhou <- verdadeiro
+    para posicao de 1 ate 3 faca
+    Dgrande[posicao,posicao] <- verdadeiro
+    fimpara
+    fimse
+    se (contDiagSecundaria = 3) entao
+    ganhou <- verdadeiro
+    para posicao de 1 ate 3 faca
+    Dgrande[posicao,4 - posicao] <- verdadeiro
+    fimpara
+    fimse
+    fimse
+    totalFinalizados <- 0
+    para linha de 1 ate 9 faca
+    se (decidido[linha]) entao
+    totalFinalizados <- totalFinalizados + 1
+    fimse
+    fimpara
+    se (ganhou) ou (totalFinalizados = 9) entao
+    jogoEncerrado <- verdadeiro
+    se (ganhou) entao
+    vencedor <- vez
+    fimse
+    senao
+    se (subjogoTerminou) entao
+    atual <- 0
+    indiceEscolhedor <- 3 - indiceEscolhedor
+    indiceJogadorDaVez <- indiceEscolhedor
+    aviso <- aviso + " Agora o jogador " + simboloJogador[indiceEscolhedor] + " escolhe o proximo quadrante."
+    senao
+    indiceJogadorDaVez <- 3 - indiceJogadorDaVez
+    fimse
+    fimse
+    fimse
+  fimse
+  fimse
+  fimenquanto
+fimalgoritmo
